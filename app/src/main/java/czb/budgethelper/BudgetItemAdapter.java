@@ -42,6 +42,15 @@ public class BudgetItemAdapter extends RecyclerView.Adapter<BudgetItemAdapter.Bu
         return itemList.size();
     }
 
+    public BudgetItem getItemAt(int position) {
+        return itemList.get(position);
+    }
+
+    public void removeItem(int position) {
+        itemList.remove(position);
+        notifyItemRemoved(position);
+    }
+
     static class BudgetViewHolder extends RecyclerView.ViewHolder {
 
         TextView itemNameText;

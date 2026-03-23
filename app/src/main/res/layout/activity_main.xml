@@ -14,6 +14,14 @@
         android:inputType="numberDecimal" />
 
     <EditText
+        android:id="@+id/zipEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:hint="Enter ZIP Code"
+        android:inputType="number" />
+
+    <EditText
         android:id="@+id/itemNameEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -45,6 +53,20 @@
         android:textSize="20sp" />
 
     <TextView
+        android:id="@+id/taxTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tax: $0.00"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/totalTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Total: $0.00"
+        android:textSize="20sp" />
+
+    <TextView
         android:id="@+id/remainingTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -58,5 +80,7 @@
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
         android:layout_weight="1" />
+
+
 
 </LinearLayout>
