@@ -1,34 +1,39 @@
 package czb.budgethelper;
 
-import android.graphics.Color;
+import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.widget.Button;
-import android.widget.EditText;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private EditText budgetEditText;
-    private EditText zipEditText;
-    private EditText itemNameEditText;
-    private EditText itemPriceEditText;
-    private Button addButton;
+    private TextInputEditText budgetEditText;
+    private TextInputEditText zipEditText;
+    private TextInputEditText itemNameEditText;
+    private TextInputEditText itemPriceEditText;
 
     private TextView subtotalTextView;
     private TextView taxTextView;
     private TextView totalTextView;
     private TextView remainingTextView;
+    private TextView emptyStateText;
+    private MaterialCardView remainingCard;
 
     private RecyclerView recyclerView;
 
@@ -47,12 +52,13 @@ public class MainActivity extends AppCompatActivity {
         zipEditText = findViewById(R.id.zipEditText);
         itemNameEditText = findViewById(R.id.itemNameEditText);
         itemPriceEditText = findViewById(R.id.itemPriceEditText);
-        addButton = findViewById(R.id.addButton);
 
         subtotalTextView = findViewById(R.id.subtotalTextView);
         taxTextView = findViewById(R.id.taxTextView);
         totalTextView = findViewById(R.id.totalTextView);
         remainingTextView = findViewById(R.id.remainingTextView);
+        emptyStateText = findViewById(R.id.emptyStateText);
+        remainingCard = findViewById(R.id.remainingCard);
 
         recyclerView = findViewById(R.id.recyclerView);
 
@@ -61,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
+        recyclerView.addItemDecoration(
+                new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
                 new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
@@ -74,14 +82,15 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                         int position = viewHolder.getAdapterPosition();
-
                         BudgetItem deletedItem = adapter.getItemAt(position);
                         subtotal -= deletedItem.getPrice();
                         adapter.removeItem(position);
 
-                        String budgetText = budgetEditText.getText().toString().trim();
-                        double budget = 0.0;
+                        updateEmptyState();
 
+                        String budgetText = budgetEditText.getText() != null
+                                ? budgetEditText.getText().toString().trim() : "";
+                        double budget = 0.0;
                         if (!TextUtils.isEmpty(budgetText)) {
                             try {
                                 budget = Double.parseDouble(budgetText);
@@ -100,13 +109,16 @@ public class MainActivity extends AppCompatActivity {
 
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
-        addButton.setOnClickListener(v -> addItem());
+        findViewById(R.id.addButton).setOnClickListener(v -> addItem());
     }
 
     private void addItem() {
-        String budgetText = budgetEditText.getText().toString().trim();
-        String itemName = itemNameEditText.getText().toString().trim();
-        String itemPriceText = itemPriceEditText.getText().toString().trim();
+        String budgetText = budgetEditText.getText() != null
+                ? budgetEditText.getText().toString().trim() : "";
+        String itemName = itemNameEditText.getText() != null
+                ? itemNameEditText.getText().toString().trim() : "";
+        String itemPriceText = itemPriceEditText.getText() != null
+                ? itemPriceEditText.getText().toString().trim() : "";
 
         if (TextUtils.isEmpty(budgetText)) {
             Toast.makeText(this, getString(R.string.error_budget), Toast.LENGTH_SHORT).show();
@@ -140,6 +152,7 @@ public class MainActivity extends AppCompatActivity {
 
         subtotal += itemPrice;
         updateTotals(budget);
+        updateEmptyState();
 
         itemNameEditText.setText("");
         itemPriceEditText.setText("");
@@ -151,19 +164,17 @@ public class MainActivity extends AppCompatActivity {
         double total = subtotal + taxAmount;
         double remaining = budget - total;
 
-        subtotalTextView.setText(String.format(Locale.US, "Subtotal: $%.2f", subtotal));
-        taxTextView.setText(String.format(Locale.US, "Tax: $%.2f", taxAmount));
-        totalTextView.setText(String.format(Locale.US, "Total: $%.2f", total));
-        remainingTextView.setText(String.format(Locale.US, "Remaining: $%.2f", remaining));
+        subtotalTextView.setText(String.format(Locale.US, "$%.2f", subtotal));
+        taxTextView.setText(String.format(Locale.US, "$%.2f", taxAmount));
+        totalTextView.setText(String.format(Locale.US, "$%.2f", total));
+        remainingTextView.setText(String.format(Locale.US, "$%.2f", remaining));
 
-        if (remaining < 0) {
-            remainingTextView.setTextColor(Color.RED);
-            subtotalTextView.setTextColor(Color.RED);
-            totalTextView.setTextColor(Color.RED);
-        } else {
-            remainingTextView.setTextColor(Color.BLACK);
-            subtotalTextView.setTextColor(Color.BLACK);
-            totalTextView.setTextColor(Color.BLACK);
-        }
+        int cardColor = ContextCompat.getColor(this,
+                remaining < 0 ? R.color.remaining_negative : R.color.remaining_positive);
+        remainingCard.setCardBackgroundColor(ColorStateList.valueOf(cardColor));
+    }
+
+    private void updateEmptyState() {
+        emptyStateText.setVisibility(itemList.isEmpty() ? View.VISIBLE : View.GONE);
     }
 }

@@ -2,4 +2,22 @@
 <resources>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="colorPrimary">#1565C0</color>
+    <color name="colorPrimaryLight">#E3F2FD</color>
+    <color name="colorPrimaryDark">#0D47A1</color>
+    <color name="colorAccent">#2196F3</color>
+
+    <color name="background">#F3F4F6</color>
+    <color name="surface">#FFFFFF</color>
+
+    <color name="text_primary">#1C1B1F</color>
+    <color name="text_secondary">#6B7280</color>
+
+    <color name="divider">#E5E7EB</color>
+
+    <color name="remaining_positive">#2E7D32</color>
+    <color name="remaining_negative">#C62828</color>
+
+    <color name="item_accent">#42A5F5</color>
 </resources>

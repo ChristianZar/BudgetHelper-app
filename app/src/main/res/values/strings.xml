@@ -1,16 +1,32 @@
 <resources>
     <string name="app_name">Budget Helper</string>
 
-    <string name="enter_budget">Enter Budget</string>
+    <string name="enter_budget">Total Budget ($)</string>
+    <string name="hint_budget">e.g. 200.00</string>
+
+    <string name="enter_zip">ZIP Code (for tax)</string>
+    <string name="hint_zip">e.g. 90210 — sets local sales tax</string>
+
     <string name="item_name">Item Name</string>
-    <string name="item_price">Item Price</string>
+    <string name="hint_item_name">e.g. Milk, Coffee, Gas</string>
+
+    <string name="item_price">Item Price ($)</string>
+    <string name="hint_item_price">e.g. 3.99</string>
+
     <string name="add_item">Add Item</string>
 
     <string name="subtotal_label">Subtotal: $0.00</string>
     <string name="remaining_label">Remaining: $0.00</string>
 
-    <string name="error_budget">Enter a budget first</string>
-    <string name="error_item_name">Enter an item name</string>
-    <string name="error_item_price">Enter an item price</string>
-    <string name="error_numbers">Enter valid numbers</string>
+    <string name="section_budget_setup">Budget Setup</string>
+    <string name="section_add_item">Add Item</string>
+    <string name="section_summary">Summary</string>
+    <string name="section_items">Your Items</string>
+    <string name="swipe_hint">← Swipe left to remove</string>
+    <string name="empty_state">No items yet.\nEnter your budget above and start adding items.</string>
+
+    <string name="error_budget">Please enter your total budget first</string>
+    <string name="error_item_name">Please enter an item name</string>
+    <string name="error_item_price">Please enter the item price</string>
+    <string name="error_numbers">Please enter valid numbers</string>
 </resources>
