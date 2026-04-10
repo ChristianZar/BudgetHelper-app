@@ -25,6 +25,27 @@
     <string name="swipe_hint">← Swipe left to remove</string>
     <string name="empty_state">No items yet.\nEnter your budget above and start adding items.</string>
 
+    <!-- Toolbar menu -->
+    <string name="menu_reports">Reports</string>
+    <string name="menu_new_session">New Session</string>
+
+    <!-- New session dialog -->
+    <string name="new_session_title">Start New Session?</string>
+    <string name="new_session_message">This will clear all current items. Your session will be saved first.</string>
+    <string name="new_session_confirm">Start Fresh</string>
+
+    <!-- Report screen -->
+    <string name="report_title">Spending Reports</string>
+    <string name="report_filter_label">Show:</string>
+    <string name="filter_today">Today</string>
+    <string name="filter_week">This Week</string>
+    <string name="filter_month">This Month</string>
+    <string name="filter_all">All Time</string>
+    <string name="report_empty">No sessions found for this period.\nAdd items and let the app run in the background to save sessions.</string>
+    <string name="report_export_csv">Export as CSV</string>
+    <string name="export_chooser_title">Share Budget Report</string>
+
+    <!-- Error messages -->
     <string name="error_budget">Please enter your total budget first</string>
     <string name="error_item_name">Please enter an item name</string>
     <string name="error_item_price">Please enter the item price</string>

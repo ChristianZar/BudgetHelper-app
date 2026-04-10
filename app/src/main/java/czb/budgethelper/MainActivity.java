@@ -1,13 +1,18 @@
 package czb.budgethelper;
 
+import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -15,11 +20,17 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.ArrayList;
 import java.util.Locale;
+
+import czb.budgethelper.db.AppDatabase;
+import czb.budgethelper.db.BudgetDao;
+import czb.budgethelper.db.SessionEntity;
+import czb.budgethelper.db.SessionItemEntity;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -28,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
     private TextInputEditText itemNameEditText;
     private TextInputEditText itemPriceEditText;
 
+    private TextView taxLabelText;
     private TextView subtotalTextView;
     private TextView taxTextView;
     private TextView totalTextView;
@@ -43,16 +55,35 @@ public class MainActivity extends AppCompatActivity {
     private double subtotal = 0.0;
     private double taxRate = 0.0;
 
+    private BudgetDao dao;
+    private boolean sessionSavedThisStop = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        dao = AppDatabase.getDatabase(this).budgetDao();
+
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_reports) {
+                startActivity(new Intent(this, ReportActivity.class));
+                return true;
+            }
+            if (item.getItemId() == R.id.action_new_session) {
+                confirmNewSession();
+                return true;
+            }
+            return false;
+        });
 
         budgetEditText = findViewById(R.id.budgetEditText);
         zipEditText = findViewById(R.id.zipEditText);
         itemNameEditText = findViewById(R.id.itemNameEditText);
         itemPriceEditText = findViewById(R.id.itemPriceEditText);
 
+        taxLabelText = findViewById(R.id.taxLabelText);
         subtotalTextView = findViewById(R.id.subtotalTextView);
         taxTextView = findViewById(R.id.taxTextView);
         totalTextView = findViewById(R.id.totalTextView);
@@ -69,6 +100,32 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(
                 new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+
+        // ZIP TextWatcher — update tax rate when 5 digits entered
+        zipEditText.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                String zip = s.toString().trim();
+                if (zip.length() == 5) {
+                    taxRate = TaxRateHelper.getTaxRate(zip);
+                    String state = TaxRateHelper.getState(zip);
+                    if (taxRate > 0) {
+                        taxLabelText.setText(String.format(Locale.US, "Tax  (%.2f%%%s)",
+                                taxRate * 100, state.isEmpty() ? "" : " · " + state));
+                    } else {
+                        taxLabelText.setText(state.isEmpty()
+                                ? "Tax  (0.00% — no sales tax)"
+                                : String.format("Tax  (0.00%% · %s)", state));
+                    }
+                } else {
+                    taxRate = 0.0;
+                    taxLabelText.setText("Tax");
+                }
+                recalculateWithCurrentBudget();
+            }
+        });
 
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(
                 new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
@@ -87,19 +144,7 @@ public class MainActivity extends AppCompatActivity {
                         adapter.removeItem(position);
 
                         updateEmptyState();
-
-                        String budgetText = budgetEditText.getText() != null
-                                ? budgetEditText.getText().toString().trim() : "";
-                        double budget = 0.0;
-                        if (!TextUtils.isEmpty(budgetText)) {
-                            try {
-                                budget = Double.parseDouble(budgetText);
-                            } catch (NumberFormatException e) {
-                                budget = 0.0;
-                            }
-                        }
-
-                        updateTotals(budget);
+                        recalculateWithCurrentBudget();
 
                         Toast.makeText(MainActivity.this,
                                 deletedItem.getName() + " removed",
@@ -110,6 +155,59 @@ public class MainActivity extends AppCompatActivity {
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
         findViewById(R.id.addButton).setOnClickListener(v -> addItem());
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        saveSessionIfNeeded();
+    }
+
+    private void saveSessionIfNeeded() {
+        if (itemList.isEmpty()) return;
+
+        String budgetText = budgetEditText.getText() != null
+                ? budgetEditText.getText().toString().trim() : "";
+        double budget = 0.0;
+        try { budget = Double.parseDouble(budgetText); } catch (NumberFormatException ignored) {}
+
+        String zip = zipEditText.getText() != null
+                ? zipEditText.getText().toString().trim() : "";
+
+        double taxAmount = subtotal * taxRate;
+        double total = subtotal + taxAmount;
+
+        final SessionEntity session = new SessionEntity(
+                System.currentTimeMillis(), budget, zip, taxRate, subtotal, taxAmount, total);
+        final ArrayList<BudgetItem> snapshot = new ArrayList<>(itemList);
+
+        new Thread(() -> {
+            long sessionId = dao.insertSession(session);
+            for (BudgetItem item : snapshot) {
+                dao.insertItem(new SessionItemEntity(sessionId, item.getName(), item.getPrice()));
+            }
+        }).start();
+    }
+
+    private void confirmNewSession() {
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.new_session_title))
+                .setMessage(getString(R.string.new_session_message))
+                .setPositiveButton(getString(R.string.new_session_confirm), (dialog, which) -> resetSession())
+                .setNegativeButton(android.R.string.cancel, null)
+                .show();
+    }
+
+    private void resetSession() {
+        itemList.clear();
+        adapter.notifyDataSetChanged();
+        subtotal = 0.0;
+        taxRate = 0.0;
+        taxLabelText.setText("Tax");
+        budgetEditText.setText("");
+        zipEditText.setText("");
+        updateTotals(0.0);
+        updateEmptyState();
     }
 
     private void addItem() {
@@ -124,12 +222,10 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, getString(R.string.error_budget), Toast.LENGTH_SHORT).show();
             return;
         }
-
         if (TextUtils.isEmpty(itemName)) {
             Toast.makeText(this, getString(R.string.error_item_name), Toast.LENGTH_SHORT).show();
             return;
         }
-
         if (TextUtils.isEmpty(itemPriceText)) {
             Toast.makeText(this, getString(R.string.error_item_price), Toast.LENGTH_SHORT).show();
             return;
@@ -137,7 +233,6 @@ public class MainActivity extends AppCompatActivity {
 
         double budget;
         double itemPrice;
-
         try {
             budget = Double.parseDouble(budgetText);
             itemPrice = Double.parseDouble(itemPriceText);
@@ -146,8 +241,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        BudgetItem item = new BudgetItem(itemName, itemPrice);
-        itemList.add(item);
+        itemList.add(new BudgetItem(itemName, itemPrice));
         adapter.notifyItemInserted(itemList.size() - 1);
 
         subtotal += itemPrice;
@@ -157,6 +251,14 @@ public class MainActivity extends AppCompatActivity {
         itemNameEditText.setText("");
         itemPriceEditText.setText("");
         itemNameEditText.requestFocus();
+    }
+
+    private void recalculateWithCurrentBudget() {
+        String budgetText = budgetEditText.getText() != null
+                ? budgetEditText.getText().toString().trim() : "";
+        double budget = 0.0;
+        try { budget = Double.parseDouble(budgetText); } catch (NumberFormatException ignored) {}
+        updateTotals(budget);
     }
 
     private void updateTotals(double budget) {

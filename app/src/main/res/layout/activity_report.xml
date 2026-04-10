@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/reportToolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:elevation="4dp"
+        app:title="@string/report_title"
+        app:titleTextColor="@color/white"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:navigationIconTint="@color/white" />
+
+    <!-- Filter spinner -->
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
+        app:cardBackgroundColor="@color/surface">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="12dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/report_filter_label"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <Spinner
+                android:id="@+id/filterSpinner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Sessions list -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/sessionsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp"
+        android:clipToPadding="false" />
+
+    <TextView
+        android:id="@+id/reportEmptyText"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/report_empty"
+        android:textColor="@color/text_secondary"
+        android:textSize="15sp"
+        android:visibility="gone" />
+
+    <!-- Export button -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/exportButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="@string/report_export_csv"
+        android:textAllCaps="false"
+        android:textSize="15sp"
+        android:paddingTop="12dp"
+        android:paddingBottom="12dp"
+        app:cornerRadius="8dp" />
+
+</LinearLayout>
