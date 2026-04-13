@@ -32,6 +32,12 @@ import czb.budgethelper.db.BudgetDao;
 import czb.budgethelper.db.SessionEntity;
 import czb.budgethelper.db.SessionItemEntity;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.widget.ImageView;
+
 public class MainActivity extends AppCompatActivity {
 
     private TextInputEditText budgetEditText;
@@ -58,6 +64,9 @@ public class MainActivity extends AppCompatActivity {
     private BudgetDao dao;
     private boolean sessionSavedThisStop = false;
 
+    private ImageView pigImage;
+    private ImageView hammerImage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -77,6 +86,9 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
+
+        pigImage = findViewById(R.id.pigImage);
+        hammerImage = findViewById(R.id.hammerImage);
 
         budgetEditText = findViewById(R.id.budgetEditText);
         zipEditText = findViewById(R.id.zipEditText);
@@ -208,6 +220,7 @@ public class MainActivity extends AppCompatActivity {
         zipEditText.setText("");
         updateTotals(0.0);
         updateEmptyState();
+        pigImage.setImageResource(R.drawable.nocrack);
     }
 
     private void addItem() {
@@ -248,11 +261,12 @@ public class MainActivity extends AppCompatActivity {
         updateTotals(budget);
         updateEmptyState();
 
+        playHammerHitAnimation();
+
         itemNameEditText.setText("");
         itemPriceEditText.setText("");
         itemNameEditText.requestFocus();
     }
-
     private void recalculateWithCurrentBudget() {
         String budgetText = budgetEditText.getText() != null
                 ? budgetEditText.getText().toString().trim() : "";
@@ -274,6 +288,66 @@ public class MainActivity extends AppCompatActivity {
         int cardColor = ContextCompat.getColor(this,
                 remaining < 0 ? R.color.remaining_negative : R.color.remaining_positive);
         remainingCard.setCardBackgroundColor(ColorStateList.valueOf(cardColor));
+
+        updatePigState(budget, total);
+    }
+
+    private void updatePigState(double budget, double total) {
+        if (pigImage == null) return;
+
+        if (budget <= 0) {
+            pigImage.setImageResource(R.drawable.nocrack);
+            return;
+        }
+
+        double percentUsed = total / budget;
+
+        if (percentUsed > 1.0) {
+            pigImage.setImageResource(R.drawable.crackfull);
+        } else if (percentUsed > 0.7) {
+            pigImage.setImageResource(R.drawable.crack);
+        } else {
+            pigImage.setImageResource(R.drawable.nocrack);
+        }
+    }
+
+    private void playHammerHitAnimation() {
+        if (hammerImage == null || pigImage == null) return;
+
+        hammerImage.setVisibility(View.VISIBLE);
+        hammerImage.setAlpha(1f);
+        hammerImage.setRotation(0f);
+        hammerImage.setTranslationY(-150f);
+        hammerImage.setTranslationX(80f);
+
+        ObjectAnimator drop = ObjectAnimator.ofFloat(
+                hammerImage, "translationY", -150f, -10f);
+        drop.setDuration(220);
+
+        ObjectAnimator rotate = ObjectAnimator.ofFloat(
+                hammerImage, "rotation", 0f, -45f);
+        rotate.setDuration(220);
+
+        AnimatorSet hammerSet = new AnimatorSet();
+        hammerSet.playTogether(drop, rotate);
+        hammerSet.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                playPigShakeAnimation();
+                hammerImage.setVisibility(View.GONE);
+            }
+        });
+        hammerSet.start();
+    }
+
+    private void playPigShakeAnimation() {
+        ObjectAnimator shake = ObjectAnimator.ofFloat(
+                pigImage,
+                "translationX",
+                0f, -12f, 12f, -8f, 8f, -4f, 4f, 0f
+        );
+        shake.setDuration(260);
+        shake.start();
     }
 
     private void updateEmptyState() {

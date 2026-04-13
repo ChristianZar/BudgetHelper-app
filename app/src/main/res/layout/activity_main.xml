@@ -164,6 +164,47 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- Animation Area -->
+            <FrameLayout
+                android:id="@+id/animationArea"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:layout_marginBottom="12dp"
+                android:layout_gravity="center">
+
+                <!-- Piggy Bank -->
+                <ImageView
+                    android:id="@+id/pigImage"
+                    android:layout_width="140dp"
+                    android:layout_height="140dp"
+                    android:layout_gravity="center|bottom"
+                    android:src="@drawable/nocrack"
+                    android:contentDescription="Piggy Bank" />
+
+                <!-- Hammer -->
+                <ImageView
+                    android:id="@+id/hammerImage"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center|top"
+                    android:src="@drawable/hammer"
+                    android:visibility="gone"
+                    android:contentDescription="Hammer" />
+
+                <!-- Coin -->
+                <ImageView
+                    android:id="@+id/coinImage"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal|top"
+                    android:visibility="gone"
+                    android:contentDescription="Coin" />
+
+            </FrameLayout>
+
+            <!-- Summary Card -->
+
+
             <!-- Summary Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
