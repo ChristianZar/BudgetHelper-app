@@ -13,9 +13,10 @@
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
         android:elevation="4dp"
+        android:paddingTop="24dp"
         app:title="@string/app_name"
         app:titleTextColor="@color/white"
-        app:subtitle="Track your spending in real time"
+        app:subtitle="@string/toolbar_subtitle"
         app:subtitleTextColor="#B3FFFFFF"
         app:menu="@menu/menu_main" />
 
@@ -179,7 +180,7 @@
                     android:layout_height="140dp"
                     android:layout_gravity="center|bottom"
                     android:src="@drawable/nocrack"
-                    android:contentDescription="Piggy Bank" />
+                    android:contentDescription="@string/desc_pig" />
 
                 <!-- Hammer -->
                 <ImageView
@@ -189,7 +190,7 @@
                     android:layout_gravity="center|top"
                     android:src="@drawable/hammer"
                     android:visibility="gone"
-                    android:contentDescription="Hammer" />
+                    android:contentDescription="@string/desc_hammer" />
 
                 <!-- Coin -->
                 <ImageView
@@ -199,11 +200,11 @@
                     android:layout_gravity="center_horizontal|top"
                     android:src="@drawable/coin"
                     android:visibility="gone"
-                    android:contentDescription="Coin" />
+                    android:contentDescription="@string/desc_coin" />
 
             </FrameLayout>
 
-            <!-- Summary Card -->
+
 
 
             <!-- Summary Card -->
@@ -241,7 +242,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Subtotal"
+                            android:text="@string/label_subtotal"
                             android:textColor="@color/text_secondary"
                             android:textSize="15sp" />
                         <TextView
@@ -264,7 +265,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Tax"
+                            android:text="@string/label_tax"
                             android:textColor="@color/text_secondary"
                             android:textSize="15sp" />
                         <TextView
@@ -292,7 +293,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Total"
+                            android:text="@string/label_total"
                             android:textColor="@color/text_primary"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -324,7 +325,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Remaining"
+                                android:text="@string/label_remaining"
                                 android:textColor="@color/white"
                                 android:textSize="15sp"
                                 android:textStyle="bold" />

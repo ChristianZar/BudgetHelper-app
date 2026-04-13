@@ -56,4 +56,16 @@
     <string name="about_message">
     Budget Helper\n\nCreated by Christian Zarate\nMobile App Development Course
 </string>
+
+    <string name="toolbar_subtitle">Track your spending in real time</string>
+
+    <string name="desc_pig">Piggy Bank</string>
+    <string name="desc_hammer">Hammer</string>
+    <string name="desc_coin">Coin</string>
+
+    <string name="label_subtotal">Subtotal</string>
+    <string name="label_tax">Tax</string>
+    <string name="label_total">Total</string>
+    <string name="label_remaining">Remaining</string>
+    <string name="item_name_label">Item Name</string>
 </resources>
