@@ -77,15 +77,25 @@ public class MainActivity extends AppCompatActivity {
         dao = AppDatabase.getDatabase(this).budgetDao();
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
+
         toolbar.setOnMenuItemClickListener(item -> {
+
             if (item.getItemId() == R.id.action_reports) {
                 startActivity(new Intent(this, ReportActivity.class));
                 return true;
             }
+
             if (item.getItemId() == R.id.action_new_session) {
                 confirmNewSession();
                 return true;
             }
+
+            // ✅ ADD THIS
+            if (item.getItemId() == R.id.action_about) {
+                showAboutDialog();
+                return true;
+            }
+
             return false;
         });
 
@@ -419,5 +429,13 @@ public class MainActivity extends AppCompatActivity {
         AnimatorSet bounce = new AnimatorSet();
         bounce.playSequentially(up, down);
         bounce.start();
+    }
+
+    private void showAboutDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle(getString(R.string.about_title))
+                .setMessage(getString(R.string.about_message))
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
     }
 }

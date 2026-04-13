@@ -50,4 +50,10 @@
     <string name="error_item_name">Please enter an item name</string>
     <string name="error_item_price">Please enter the item price</string>
     <string name="error_numbers">Please enter valid numbers</string>
+
+    <string name="about_title">About</string>
+
+    <string name="about_message">
+    Budget Helper\n\nCreated by Christian Zarate\nMobile App Development Course
+</string>
 </resources>
