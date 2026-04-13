@@ -197,6 +197,7 @@
                     android:layout_width="60dp"
                     android:layout_height="60dp"
                     android:layout_gravity="center_horizontal|top"
+                    android:src="@drawable/coin"
                     android:visibility="gone"
                     android:contentDescription="Coin" />
 

@@ -67,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageView pigImage;
     private ImageView hammerImage;
 
+    private ImageView coinImage;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
         pigImage = findViewById(R.id.pigImage);
         hammerImage = findViewById(R.id.hammerImage);
+        coinImage = findViewById(R.id.coinImage);
 
         budgetEditText = findViewById(R.id.budgetEditText);
         zipEditText = findViewById(R.id.zipEditText);
@@ -152,11 +155,26 @@ public class MainActivity extends AppCompatActivity {
                     public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                         int position = viewHolder.getAdapterPosition();
                         BudgetItem deletedItem = adapter.getItemAt(position);
+
                         subtotal -= deletedItem.getPrice();
                         adapter.removeItem(position);
 
                         updateEmptyState();
                         recalculateWithCurrentBudget();
+
+                        String budgetText = budgetEditText.getText() != null
+                                ? budgetEditText.getText().toString().trim() : "";
+                        double budget = 0.0;
+                        try {
+                            budget = Double.parseDouble(budgetText);
+                        } catch (NumberFormatException ignored) {}
+
+                        double taxAmount = subtotal * taxRate;
+                        double total = subtotal + taxAmount;
+
+                        if (budget > 0 && total <= budget) {
+                            playCoinDropAnimation();
+                        }
 
                         Toast.makeText(MainActivity.this,
                                 deletedItem.getName() + " removed",
@@ -352,5 +370,54 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateEmptyState() {
         emptyStateText.setVisibility(itemList.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private void playCoinDropAnimation() {
+        if (coinImage == null || pigImage == null) return;
+
+        coinImage.setVisibility(View.VISIBLE);
+
+        coinImage.setTranslationY(-200f);
+        coinImage.setAlpha(1f);
+
+        ObjectAnimator drop = ObjectAnimator.ofFloat(
+                coinImage,
+                "translationY",
+                -200f,
+                40f
+        );
+        drop.setDuration(400);
+
+        drop.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                coinImage.setVisibility(View.GONE);
+                playPigBounce();
+            }
+        });
+
+        drop.start();
+    }
+
+    private void playPigBounce() {
+        ObjectAnimator up = ObjectAnimator.ofFloat(
+                pigImage,
+                "translationY",
+                0f,
+                -25f
+        );
+        up.setDuration(150);
+
+        ObjectAnimator down = ObjectAnimator.ofFloat(
+                pigImage,
+                "translationY",
+                -25f,
+                0f
+        );
+        down.setDuration(150);
+
+        AnimatorSet bounce = new AnimatorSet();
+        bounce.playSequentially(up, down);
+        bounce.start();
     }
 }
