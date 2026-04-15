@@ -37,6 +37,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.widget.ImageView;
+import android.content.Intent;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -82,6 +83,16 @@ public class MainActivity extends AppCompatActivity {
 
             if (item.getItemId() == R.id.action_reports) {
                 startActivity(new Intent(this, ReportActivity.class));
+                return true;
+            }
+
+            if (item.getItemId() == R.id.action_graph) {
+                saveSessionIfNeeded();
+
+                new android.os.Handler(getMainLooper()).postDelayed(() -> {
+                    startActivity(new Intent(this, MonthlyGraphActivity.class));
+                }, 500); // wait 0.5 seconds
+
                 return true;
             }
 

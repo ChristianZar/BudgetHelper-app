@@ -68,4 +68,11 @@
     <string name="label_total">Total</string>
     <string name="label_remaining">Remaining</string>
     <string name="item_name_label">Item Name</string>
+
+    <string name="monthly_graph_title">Last 6 Months Spending</string>
+    <string name="highest_month">Highest:</string>
+    <string name="lowest_month">Lowest:</string>
+    <string name="average_spending">Average:</string>
+    <string name="menu_graph">Monthly Graph</string>
+    <string name="menu_about">About</string>
 </resources>
