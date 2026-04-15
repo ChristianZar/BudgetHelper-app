@@ -1,0 +1,83 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="120dp"
+    android:viewportWidth="200"
+    android:viewportHeight="120">
+
+    <!--
+        Gauge: center (100,100), outer r=90, inner r=60, upper semicircle.
+
+        Arc direction rule (SVG Y-down):
+          sweep=0 (counterclockwise) goes  RIGHT → TOP → LEFT
+          sweep=1 (clockwise)        goes  LEFT  → TOP → RIGHT
+
+        Outer sector arcs travel counterclockwise: RIGHT→TOP→LEFT  → sweep=0
+        Inner sector arcs travel clockwise back:   LEFT→TOP→RIGHT  → sweep=1
+
+        Boundary points (outer r=90 / inner r=60):
+          0°  : outer (190,100)   inner (160,100)
+          108°: outer (72.2,14.4) inner (81.5,42.9)
+          144°: outer (27.2,47.1) inner (51.5,64.7)
+          180°: outer (10,100)    inner (40,100)
+    -->
+
+    <!-- Gray ring background -->
+    <!-- outer: LEFT→TOP→RIGHT (clockwise, sweep=1)  -->
+    <!-- inner: RIGHT→TOP→LEFT (counterclockwise, sweep=0) -->
+    <path
+        android:pathData="M 10,100
+                          A 90,90 0 0,1 190,100
+                          L 160,100
+                          A 60,60 0 0,0 40,100
+                          Z"
+        android:fillColor="#E0E0E0" />
+
+    <!-- Green zone  0°→108°  outer CCW (sweep=0), inner CW back (sweep=1) -->
+    <path
+        android:pathData="M 190,100
+                          A 90,90 0 0,0 72.2,14.4
+                          L 81.5,42.9
+                          A 60,60 0 0,1 160,100
+                          Z"
+        android:fillColor="#43A047" />
+
+    <!-- Yellow zone  108°→144°  same direction -->
+    <path
+        android:pathData="M 72.2,14.4
+                          A 90,90 0 0,0 27.2,47.1
+                          L 51.5,64.7
+                          A 60,60 0 0,1 81.5,42.9
+                          Z"
+        android:fillColor="#FFB300" />
+
+    <!-- Red zone  144°→180° -->
+    <path
+        android:pathData="M 27.2,47.1
+                          A 90,90 0 0,0 10,100
+                          L 40,100
+                          A 60,60 0 0,1 51.5,64.7
+                          Z"
+        android:fillColor="#E53935" />
+
+    <!-- White inner mask: fills center half-disk so only the ring shows -->
+    <!-- LEFT→TOP→RIGHT (clockwise, sweep=1) then closed = upper semicircle filled -->
+    <path
+        android:pathData="M 40,100
+                          A 60,60 0 0,1 160,100
+                          Z"
+        android:fillColor="#FFFFFF" />
+
+    <!-- Tick marks at E (left), mid (top), F (right) -->
+    <path android:pathData="M 12,100 L 18,100"
+        android:strokeColor="#616161" android:strokeWidth="2.5" />
+    <path android:pathData="M 100,12 L 100,18"
+        android:strokeColor="#616161" android:strokeWidth="2.5" />
+    <path android:pathData="M 182,100 L 188,100"
+        android:strokeColor="#616161" android:strokeWidth="2.5" />
+
+    <!-- Center hub -->
+    <path
+        android:pathData="M 107,100 A 7,7 0 1,1 93,100 A 7,7 0 1,1 107,100"
+        android:fillColor="#37474F" />
+
+</vector>
