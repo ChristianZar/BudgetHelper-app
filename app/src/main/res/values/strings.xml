@@ -51,6 +51,15 @@
     <string name="error_item_price">Please enter the item price</string>
     <string name="error_numbers">Please enter valid numbers</string>
 
+    <!-- Spending Meter gauge (Thinh Le's animation) -->
+    <string name="gauge_title">Spending Meter</string>
+    <string name="gauge_face_desc">Budget gauge face</string>
+    <string name="gauge_needle_desc">Budget gauge needle</string>
+    <string name="gauge_status_ready">Enter a budget to start</string>
+    <string name="gauge_status_ok">On track ✓</string>
+    <string name="gauge_status_low">Getting close…</string>
+    <string name="gauge_status_over">Over budget!</string>
+
     <string name="about_title">About</string>
 
     <string name="about_message">

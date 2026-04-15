@@ -67,8 +67,14 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView pigImage;
     private ImageView hammerImage;
-
     private ImageView coinImage;
+
+    // ── Spending Meter (Thinh Le's animation) ──────────────────────────────
+    private ImageView gaugeNeedle;
+    private TextView gaugeStatusText;
+    private com.google.android.material.card.MaterialCardView gaugeCard;
+    private float currentNeedleRotation = 90f; // starts at F (full, +90°)
+    private int lastGaugeZone = 0; // 0=green, 1=yellow, 2=red
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +119,17 @@ public class MainActivity extends AppCompatActivity {
         pigImage = findViewById(R.id.pigImage);
         hammerImage = findViewById(R.id.hammerImage);
         coinImage = findViewById(R.id.coinImage);
+
+        gaugeNeedle = findViewById(R.id.gaugeNeedle);
+        gaugeStatusText = findViewById(R.id.gaugeStatusText);
+        gaugeCard = findViewById(R.id.gaugeCard);
+
+        // Set needle pivot to the gauge centre (100/200 wide, 100/120 tall in viewport)
+        gaugeNeedle.post(() -> {
+            gaugeNeedle.setPivotX(gaugeNeedle.getWidth() / 2f);
+            gaugeNeedle.setPivotY(gaugeNeedle.getHeight() * (100f / 120f));
+            gaugeNeedle.setRotation(90f); // start at F
+        });
 
         budgetEditText = findViewById(R.id.budgetEditText);
         zipEditText = findViewById(R.id.zipEditText);
@@ -260,6 +277,22 @@ public class MainActivity extends AppCompatActivity {
         updateTotals(0.0);
         updateEmptyState();
         pigImage.setImageResource(R.drawable.nocrack);
+
+        // Reset gauge to F (full)
+        currentNeedleRotation = 90f;
+        lastGaugeZone = 0;
+        if (gaugeNeedle != null) {
+            ObjectAnimator.ofFloat(gaugeNeedle, "rotation", gaugeNeedle.getRotation(), 90f)
+                    .setDuration(600).start();
+        }
+        if (gaugeStatusText != null) {
+            gaugeStatusText.setText(getString(R.string.gauge_status_ready));
+            gaugeStatusText.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
+        }
+        if (gaugeCard != null) {
+            gaugeCard.setCardBackgroundColor(
+                    ColorStateList.valueOf(ContextCompat.getColor(this, R.color.surface)));
+        }
     }
 
     private void addItem() {
@@ -329,6 +362,136 @@ public class MainActivity extends AppCompatActivity {
         remainingCard.setCardBackgroundColor(ColorStateList.valueOf(cardColor));
 
         updatePigState(budget, total);
+        updateGauge(budget, total);
+    }
+
+    // ── Spending Meter animation (Thinh Le) ────────────────────────────────
+
+    /**
+     * Updates the fuel-gauge needle to reflect how much of the budget has been spent.
+     *
+     * Story:
+     *  • 0 % spent  → needle rests at F (full, +90° rotation)
+     *  • 50% spent  → needle points straight up (0°)
+     *  • 100%+ spent→ needle swings to E (empty, −90° or beyond)
+     *
+     * Zone crossing triggers extra animations:
+     *  • Entering yellow → warning wobble
+     *  • Entering red    → alarm shake + card flash
+     *  • Returning green → celebration bounce
+     */
+    private void updateGauge(double budget, double total) {
+        if (gaugeNeedle == null || budget <= 0) {
+            if (gaugeStatusText != null) {
+                gaugeStatusText.setText(getString(R.string.gauge_status_ready));
+                gaugeStatusText.setTextColor(ContextCompat.getColor(this, R.color.text_secondary));
+            }
+            return;
+        }
+
+        double percentSpent = total / budget;
+        // rotation: +90° = F (0% spent), 0° = 50%, −90° = E (100% spent)
+        float targetRotation = (float) (90.0 - percentSpent * 180.0);
+        targetRotation = Math.max(-105f, Math.min(90f, targetRotation)); // clamp
+
+        // Determine zone (0=green, 1=yellow, 2=red)
+        int zone = percentSpent < 0.6 ? 0 : percentSpent < 0.8 ? 1 : 2;
+
+        animateNeedle(targetRotation, zone);
+
+        // Status text + colour
+        String statusMsg;
+        int statusColor;
+        if (percentSpent <= 0) {
+            statusMsg = getString(R.string.gauge_status_ready);
+            statusColor = ContextCompat.getColor(this, R.color.text_secondary);
+        } else if (zone == 0) {
+            statusMsg = getString(R.string.gauge_status_ok);
+            statusColor = ContextCompat.getColor(this, R.color.remaining_positive);
+        } else if (zone == 1) {
+            statusMsg = getString(R.string.gauge_status_low);
+            statusColor = 0xFFFFB300; // amber
+        } else {
+            statusMsg = getString(R.string.gauge_status_over);
+            statusColor = ContextCompat.getColor(this, R.color.remaining_negative);
+        }
+        gaugeStatusText.setText(statusMsg);
+        gaugeStatusText.setTextColor(statusColor);
+
+        // Zone-crossing animations
+        if (zone != lastGaugeZone) {
+            if (zone == 1) {
+                playNeedleWobble();         // entering yellow — gentle warning
+            } else if (zone == 2) {
+                playNeedleAlarm();          // entering red — dramatic shake
+                playGaugeCardFlash();
+            } else if (lastGaugeZone > 0) {
+                playNeedleCelebration();    // returning to green — bounce
+            }
+            lastGaugeZone = zone;
+        }
+    }
+
+    /** Smoothly rotates the needle to the target angle. */
+    private void animateNeedle(float targetRotation, int zone) {
+        android.animation.TimeInterpolator interpolator = zone == 2
+                ? new android.view.animation.OvershootInterpolator(1.5f)
+                : new android.view.animation.DecelerateInterpolator();
+
+        ObjectAnimator anim = ObjectAnimator.ofFloat(
+                gaugeNeedle, "rotation", currentNeedleRotation, targetRotation);
+        anim.setDuration(450);
+        anim.setInterpolator(interpolator);
+        anim.start();
+        currentNeedleRotation = targetRotation;
+    }
+
+    /** Gentle left-right wobble when entering the yellow (caution) zone. */
+    private void playNeedleWobble() {
+        float base = currentNeedleRotation;
+        ObjectAnimator wobble = ObjectAnimator.ofFloat(
+                gaugeNeedle, "rotation",
+                base, base - 8f, base + 8f, base - 5f, base + 5f, base);
+        wobble.setDuration(500);
+        wobble.setInterpolator(new android.view.animation.LinearInterpolator());
+        wobble.start();
+    }
+
+    /** Rapid alarm shake when entering the red (over-budget) zone. */
+    private void playNeedleAlarm() {
+        float base = currentNeedleRotation;
+        ObjectAnimator alarm = ObjectAnimator.ofFloat(
+                gaugeNeedle, "rotation",
+                base, base - 15f, base + 15f, base - 12f, base + 12f,
+                base - 8f, base + 8f, base);
+        alarm.setDuration(700);
+        alarm.setInterpolator(new android.view.animation.LinearInterpolator());
+        alarm.start();
+    }
+
+    /**
+     * Brief card background flash to red when going over budget.
+     * Uses a colour change sequence on the gauge card itself.
+     */
+    private void playGaugeCardFlash() {
+        if (gaugeCard == null) return;
+        int flashColor = ContextCompat.getColor(this, R.color.remaining_negative);
+        int normalColor = ContextCompat.getColor(this, R.color.surface);
+
+        gaugeCard.setCardBackgroundColor(ColorStateList.valueOf(flashColor));
+        gaugeCard.postDelayed(() ->
+                gaugeCard.setCardBackgroundColor(ColorStateList.valueOf(normalColor)), 400);
+    }
+
+    /** Small upward bounce on the needle when returning to the green zone. */
+    private void playNeedleCelebration() {
+        float base = currentNeedleRotation;
+        ObjectAnimator celebrate = ObjectAnimator.ofFloat(
+                gaugeNeedle, "rotation",
+                base, base + 20f, base - 5f, base + 8f, base);
+        celebrate.setDuration(500);
+        celebrate.setInterpolator(new android.view.animation.DecelerateInterpolator());
+        celebrate.start();
     }
 
     private void updatePigState(double budget, double total) {

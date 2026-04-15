@@ -1,0 +1,29 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="120dp"
+    android:viewportWidth="200"
+    android:viewportHeight="120">
+
+    <!--
+        Needle origin / pivot: (100, 100) — same coordinate as the gauge centre.
+        The needle points UPWARD by default (0° rotation).
+        MainActivity sets pivotX = viewWidth/2 and pivotY = viewHeight * 5/6
+        so rotation is always about (100, 100) in viewport space.
+
+        Rotation mapping (applied in code):
+          rotation = +90°  → needle points RIGHT → F (0% spent)
+          rotation =   0°  → needle points UP    → 50% spent
+          rotation = –90°  → needle points LEFT  → E (100%+ spent)
+    -->
+
+    <!-- Needle body: thin elongated triangle, tip at top, base near pivot -->
+    <path
+        android:pathData="M 97.5,95 L 100,18 L 102.5,95 Z"
+        android:fillColor="#C62828" />
+
+    <!-- Short counterweight tail below pivot for realism -->
+    <path
+        android:pathData="M 98.5,100 L 100,112 L 101.5,100 Z"
+        android:fillColor="#455A64" />
+
+</vector>

@@ -93,6 +93,101 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
+            <!-- ── Spending Meter Card (Thinh Le's animation) ───────────────── -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/gaugeCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/surface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Card header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/gauge_title"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.08" />
+
+                        <TextView
+                            android:id="@+id/gaugeStatusText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/gauge_status_ready"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <!-- Gauge graphic: face + needle overlaid, E/F labels at sides -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal">
+
+                        <!-- Gauge face -->
+                        <ImageView
+                            android:id="@+id/gaugeFace"
+                            android:layout_width="220dp"
+                            android:layout_height="132dp"
+                            android:layout_gravity="center_horizontal"
+                            android:src="@drawable/gauge_face"
+                            android:contentDescription="@string/gauge_face_desc" />
+
+                        <!-- Needle (same size/position as face so pivot aligns) -->
+                        <ImageView
+                            android:id="@+id/gaugeNeedle"
+                            android:layout_width="220dp"
+                            android:layout_height="132dp"
+                            android:layout_gravity="center_horizontal"
+                            android:src="@drawable/gauge_needle"
+                            android:contentDescription="@string/gauge_needle_desc" />
+
+                        <!-- "E" label — bottom-left -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|start"
+                            android:layout_marginStart="20dp"
+                            android:layout_marginBottom="0dp"
+                            android:text="E"
+                            android:textColor="#E53935"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <!-- "F" label — bottom-right -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|end"
+                            android:layout_marginEnd="20dp"
+                            android:layout_marginBottom="0dp"
+                            android:text="F"
+                            android:textColor="#43A047"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </FrameLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Add Item Card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
