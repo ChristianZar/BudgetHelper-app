@@ -54,6 +54,9 @@ import com.google.android.gms.location.LocationServices;
 import java.io.IOException;
 import java.util.List;
 
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
+
 public class MainActivity extends AppCompatActivity {
 
     private TextInputEditText budgetEditText;
@@ -94,6 +97,13 @@ public class MainActivity extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
     private ActivityResultLauncher<String> requestPermissionLauncher;
 
+    private final ActivityResultLauncher<ScanOptions> barcodeLauncher =
+            registerForActivityResult(new ScanContract(), result -> {
+                if (result.getContents() != null) {
+                    fetchProductName(result.getContents());
+                }
+            });
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,6 +125,8 @@ public class MainActivity extends AppCompatActivity {
         dao = AppDatabase.getDatabase(this).budgetDao();
 
         MaterialToolbar toolbar = findViewById(R.id.toolbar);
+
+
 
         toolbar.setOnMenuItemClickListener(item -> {
 
@@ -256,6 +268,8 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.addButton).setOnClickListener(v -> addItem());
 
         findViewById(R.id.useLocationButton).setOnClickListener(v -> checkLocationPermissionAndFetchZip());
+
+        findViewById(R.id.scanBarcodeButton).setOnClickListener(v -> startBarcodeScan());
     }
 
     @Override
@@ -727,5 +741,58 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, getString(R.string.zip_not_found), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void startBarcodeScan() {
+        ScanOptions options = new ScanOptions();
+        options.setPrompt("Scan a barcode");
+        options.setBeepEnabled(true);
+        options.setOrientationLocked(true);
+
+        barcodeLauncher.launch(options);
+    }
+
+    private void fetchProductName(String barcode) {
+        new Thread(() -> {
+            try {
+                String urlString = "https://api.upcitemdb.com/prod/trial/lookup?upc=" + barcode;
+                java.net.URL url = new java.net.URL(urlString);
+
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+
+                java.io.BufferedReader reader = new java.io.BufferedReader(
+                        new java.io.InputStreamReader(conn.getInputStream())
+                );
+
+                StringBuilder response = new StringBuilder();
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+
+                reader.close();
+
+                org.json.JSONObject json = new org.json.JSONObject(response.toString());
+                org.json.JSONArray items = json.getJSONArray("items");
+
+                if (items.length() > 0) {
+                    String title = items.getJSONObject(0).getString("title");
+
+                    runOnUiThread(() -> itemNameEditText.setText(title));
+                } else {
+                    runOnUiThread(() ->
+                            Toast.makeText(this, "Product not found", Toast.LENGTH_SHORT).show()
+                    );
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() ->
+                        Toast.makeText(this, "Error fetching product", Toast.LENGTH_SHORT).show()
+                );
+            }
+        }).start();
     }
 }

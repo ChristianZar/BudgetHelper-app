@@ -256,6 +256,13 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.button.MaterialButton
+                        android:id="@+id/scanBarcodeButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Scan Barcode"
+                        android:textAllCaps="false"/>
+
+                    <com.google.android.material.button.MaterialButton
                         android:id="@+id/addButton"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
