@@ -39,6 +39,21 @@ import android.animation.ObjectAnimator;
 import android.widget.ImageView;
 import android.content.Intent;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
+
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.app.ActivityCompat;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+
+import java.io.IOException;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     private TextInputEditText budgetEditText;
@@ -76,10 +91,26 @@ public class MainActivity extends AppCompatActivity {
     private float currentNeedleRotation = 90f; // starts at F (full, +90°)
     private int lastGaugeZone = 0; // 0=green, 1=yellow, 2=red
 
+    private FusedLocationProviderClient fusedLocationClient;
+    private ActivityResultLauncher<String> requestPermissionLauncher;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
+        requestPermissionLauncher = registerForActivityResult(
+                new ActivityResultContracts.RequestPermission(),
+                isGranted -> {
+                    if (isGranted) {
+                        getCurrentZipFromLocation();
+                    } else {
+                        Toast.makeText(this, getString(R.string.location_permission_denied), Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
 
         dao = AppDatabase.getDatabase(this).budgetDao();
 
@@ -223,6 +254,8 @@ public class MainActivity extends AppCompatActivity {
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
         findViewById(R.id.addButton).setOnClickListener(v -> addItem());
+
+        findViewById(R.id.useLocationButton).setOnClickListener(v -> checkLocationPermissionAndFetchZip());
     }
 
     @Override
@@ -611,5 +644,88 @@ public class MainActivity extends AppCompatActivity {
                 .setMessage(getString(R.string.about_message))
                 .setPositiveButton(android.R.string.ok, null)
                 .show();
+    }
+
+    private void checkLocationPermissionAndFetchZip() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            getCurrentZipFromLocation();
+        } else {
+            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+
+    private void getCurrentZipFromLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        fusedLocationClient.getCurrentLocation(
+                com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+                null
+        ).addOnSuccessListener(location -> {
+            if (location != null) {
+                handleLocationResult(location.getLatitude(), location.getLongitude());
+            } else {
+                Toast.makeText(this, "Location still null", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private String getZipCodeFromLocation(double latitude, double longitude) {
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+
+        try {
+            List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses != null && !addresses.isEmpty()) {
+                String postalCode = addresses.get(0).getPostalCode();
+                if (!TextUtils.isEmpty(postalCode)) {
+                    if (postalCode.length() >= 5) {
+                        return postalCode.substring(0, 5);
+                    }
+                    return postalCode;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return "";
+    }
+
+    private void requestFreshLocation() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        fusedLocationClient.getCurrentLocation(
+                        com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+                        null
+                )
+                .addOnSuccessListener(location -> {
+                    if (location != null) {
+                        handleLocationResult(location.getLatitude(), location.getLongitude());
+                    } else {
+                        Toast.makeText(this, getString(R.string.location_not_found), Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e ->
+                        Toast.makeText(this, getString(R.string.location_not_found), Toast.LENGTH_SHORT).show()
+                );
+    }
+
+    private void handleLocationResult(double latitude, double longitude) {
+        String zipCode = getZipCodeFromLocation(latitude, longitude);
+
+        if (!TextUtils.isEmpty(zipCode) && zipCode.length() == 5) {
+            zipEditText.setText(zipCode);
+            Toast.makeText(this, getString(R.string.location_zip_set), Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, getString(R.string.zip_not_found), Toast.LENGTH_SHORT).show();
+        }
     }
 }

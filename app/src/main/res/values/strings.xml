@@ -84,4 +84,12 @@
     <string name="average_spending">Average:</string>
     <string name="menu_graph">Monthly Graph</string>
     <string name="menu_about">About</string>
+
+
+
+    <string name="use_my_location">Use My Location</string>
+    <string name="location_permission_denied">Location permission denied</string>
+    <string name="location_not_found">Could not get current location</string>
+    <string name="zip_not_found">Could not find ZIP code from location</string>
+    <string name="location_zip_set">ZIP code set from current location</string>
 </resources>

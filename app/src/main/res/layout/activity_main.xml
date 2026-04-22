@@ -90,6 +90,15 @@
                             android:imeOptions="actionNext" />
                     </com.google.android.material.textfield.TextInputLayout>
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/useLocationButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/use_my_location"
+                        android:textAllCaps="false"
+                        app:cornerRadius="8dp" />
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
