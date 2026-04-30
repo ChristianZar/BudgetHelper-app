@@ -1,0 +1,517 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background">
+
+    <!-- App Bar -->
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        android:elevation="4dp"
+        android:paddingTop="24dp"
+        app:title="@string/app_name"
+        app:titleTextColor="@color/white"
+        app:subtitle="@string/toolbar_subtitle"
+        app:subtitleTextColor="#B3FFFFFF"
+        app:menu="@menu/menu_main" />
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Budget Setup Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/surface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:text="@string/section_budget_setup"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:hint="@string/enter_budget"
+                        app:helperText="@string/hint_budget"
+                        app:prefixText="$">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/budgetEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:imeOptions="actionNext" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:hint="@string/enter_zip"
+                        app:helperText="@string/hint_zip">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/zipEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="number"
+                            android:maxLength="5"
+                            android:imeOptions="actionNext" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/useLocationButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:text="@string/use_my_location"
+                        android:textAllCaps="false"
+                        app:cornerRadius="8dp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ── Spending Meter Card (Thinh Le's animation) ───────────────── -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/gaugeCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/surface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Card header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/gauge_title"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.08" />
+
+                        <TextView
+                            android:id="@+id/gaugeStatusText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/gauge_status_ready"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <!-- Gauge graphic: face + needle overlaid, E/F labels at sides -->
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal">
+
+                        <!-- Gauge face -->
+                        <ImageView
+                            android:id="@+id/gaugeFace"
+                            android:layout_width="220dp"
+                            android:layout_height="132dp"
+                            android:layout_gravity="center_horizontal"
+                            android:src="@drawable/gauge_face"
+                            android:contentDescription="@string/gauge_face_desc" />
+
+                        <!-- Needle (same size/position as face so pivot aligns) -->
+                        <ImageView
+                            android:id="@+id/gaugeNeedle"
+                            android:layout_width="220dp"
+                            android:layout_height="132dp"
+                            android:layout_gravity="center_horizontal"
+                            android:src="@drawable/gauge_needle"
+                            android:contentDescription="@string/gauge_needle_desc" />
+
+                        <!-- "E" label — bottom-left -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|start"
+                            android:layout_marginStart="20dp"
+                            android:layout_marginBottom="0dp"
+                            android:text="E"
+                            android:textColor="#E53935"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <!-- "F" label — bottom-right -->
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="bottom|end"
+                            android:layout_marginEnd="20dp"
+                            android:layout_marginBottom="0dp"
+                            android:text="F"
+                            android:textColor="#43A047"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                    </FrameLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Add Item Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/surface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:text="@string/section_add_item"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:hint="@string/item_name"
+                        app:helperText="@string/hint_item_name">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/itemNameEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="textCapWords"
+                            android:imeOptions="actionNext" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="16dp"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:hint="@string/item_price"
+                        app:helperText="@string/hint_item_price"
+                        app:prefixText="$">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/itemPriceEditText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:inputType="numberDecimal"
+                            android:imeOptions="actionDone" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/scanBarcodeButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Scan Barcode"
+                        android:textAllCaps="false"/>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/addButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/add_item"
+                        android:textAllCaps="false"
+                        android:textSize="15sp"
+                        android:paddingTop="12dp"
+                        android:paddingBottom="12dp"
+                        app:cornerRadius="8dp" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Animation Area -->
+            <FrameLayout
+                android:id="@+id/animationArea"
+                android:layout_width="match_parent"
+                android:layout_height="220dp"
+                android:layout_marginBottom="12dp"
+                android:layout_gravity="center">
+
+                <!-- Piggy Bank -->
+                <ImageView
+                    android:id="@+id/pigImage"
+                    android:layout_width="140dp"
+                    android:layout_height="140dp"
+                    android:layout_gravity="center|bottom"
+                    android:src="@drawable/nocrack"
+                    android:contentDescription="@string/desc_pig" />
+
+                <!-- Hammer -->
+                <ImageView
+                    android:id="@+id/hammerImage"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_gravity="center|top"
+                    android:src="@drawable/hammer"
+                    android:visibility="gone"
+                    android:contentDescription="@string/desc_hammer" />
+
+                <!-- Coin -->
+                <ImageView
+                    android:id="@+id/coinImage"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_gravity="center_horizontal|top"
+                    android:src="@drawable/coin"
+                    android:visibility="gone"
+                    android:contentDescription="@string/desc_coin" />
+
+            </FrameLayout>
+
+
+
+
+            <!-- Summary Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/surface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:text="@string/section_summary"
+                        android:textColor="@color/colorPrimary"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08" />
+
+                    <!-- Subtotal row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="6dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_subtotal"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="15sp" />
+                        <TextView
+                            android:id="@+id/subtotalTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="$0.00"
+                            android:textColor="@color/text_primary"
+                            android:textSize="15sp" />
+                    </LinearLayout>
+
+                    <!-- Tax row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp">
+                        <TextView
+                            android:id="@+id/taxLabelText"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_tax"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="15sp" />
+                        <TextView
+                            android:id="@+id/taxTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="$0.00"
+                            android:textColor="@color/text_primary"
+                            android:textSize="15sp" />
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginBottom="10dp"
+                        android:background="@color/divider" />
+
+                    <!-- Total row -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/label_total"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:id="@+id/totalTextView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="$0.00"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Remaining pill -->
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/remainingCard"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp"
+                        app:cardBackgroundColor="@color/remaining_positive">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:padding="12dp">
+                            <TextView
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="@string/label_remaining"
+                                android:textColor="@color/white"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+                            <TextView
+                                android:id="@+id/remainingTextView"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="$0.00"
+                                android:textColor="@color/white"
+                                android:textSize="15sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Items List Card -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="2dp"
+                app:cardBackgroundColor="@color/surface">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Items header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/section_items"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.08" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/swipe_hint"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="11sp" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:nestedScrollingEnabled="false" />
+
+                    <TextView
+                        android:id="@+id/emptyStateText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:padding="24dp"
+                        android:text="@string/empty_state"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp"
+                        android:visibility="visible" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>
