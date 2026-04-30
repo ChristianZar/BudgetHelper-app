@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/background">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        app:title="@string/app_name"
+        app:titleTextColor="@color/white"
+        app:subtitle="@string/toolbar_subtitle"
+        app:subtitleTextColor="#B3FFFFFF"
+        app:menu="@menu/menu_main" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <!-- LEFT SIDE: budget, add item, list -->
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingEnd="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardBackgroundColor="@color/surface">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/section_budget_setup"
+                            android:textColor="@color/colorPrimary"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:hint="@string/enter_budget"
+                            app:prefixText="$">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/budgetEditText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberDecimal" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:hint="@string/enter_zip">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/zipEditText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="number"
+                                android:maxLength="5" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/useLocationButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/use_my_location"
+                            android:textAllCaps="false" />
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardBackgroundColor="@color/surface">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/section_add_item"
+                            android:textColor="@color/colorPrimary"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:hint="@string/item_name">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/itemNameEditText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="textCapWords" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:hint="@string/item_price"
+                            app:prefixText="$">
+
+                            <com.google.android.material.textfield.TextInputEditText
+                                android:id="@+id/itemPriceEditText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:inputType="numberDecimal" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/scanBarcodeButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="Scan Barcode"
+                            android:textAllCaps="false" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/addButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/add_item"
+                            android:textAllCaps="false" />
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="12dp"
+                    app:cardBackgroundColor="@color/surface">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/section_items"
+                            android:textColor="@color/colorPrimary"
+                            android:textStyle="bold" />
+
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/recyclerView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:nestedScrollingEnabled="false" />
+
+                        <TextView
+                            android:id="@+id/emptyStateText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:padding="24dp"
+                            android:text="@string/empty_state"
+                            android:textColor="@color/text_secondary" />
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+        <!-- RIGHT SIDE: gauge, pig, summary -->
+        <androidx.core.widget.NestedScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingStart="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:id="@+id/gaugeCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardBackgroundColor="@color/surface">
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="190dp">
+
+                        <TextView
+                            android:id="@+id/gaugeStatusText"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="top|center_horizontal"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/gauge_status_ready"
+                            android:textColor="@color/text_secondary" />
+
+                        <ImageView
+                            android:id="@+id/gaugeFace"
+                            android:layout_width="260dp"
+                            android:layout_height="156dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/gauge_face"
+                            android:contentDescription="@string/gauge_face_desc" />
+
+                        <ImageView
+                            android:id="@+id/gaugeNeedle"
+                            android:layout_width="260dp"
+                            android:layout_height="156dp"
+                            android:layout_gravity="center"
+                            android:src="@drawable/gauge_needle"
+                            android:contentDescription="@string/gauge_needle_desc" />
+
+                    </FrameLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <FrameLayout
+                    android:id="@+id/animationArea"
+                    android:layout_width="match_parent"
+                    android:layout_height="220dp"
+                    android:layout_marginBottom="12dp">
+
+                    <ImageView
+                        android:id="@+id/pigImage"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:layout_gravity="center|bottom"
+                        android:src="@drawable/nocrack"
+                        android:contentDescription="@string/desc_pig" />
+
+                    <ImageView
+                        android:id="@+id/hammerImage"
+                        android:layout_width="100dp"
+                        android:layout_height="100dp"
+                        android:layout_gravity="center|top"
+                        android:src="@drawable/hammer"
+                        android:visibility="gone"
+                        android:contentDescription="@string/desc_hammer" />
+
+                    <ImageView
+                        android:id="@+id/coinImage"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_gravity="center_horizontal|top"
+                        android:src="@drawable/coin"
+                        android:visibility="gone"
+                        android:contentDescription="@string/desc_coin" />
+
+                </FrameLayout>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="12dp"
+                    app:cardBackgroundColor="@color/surface">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/section_summary"
+                            android:textColor="@color/colorPrimary"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/taxLabelText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/label_tax" />
+
+                        <TextView
+                            android:id="@+id/subtotalTextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="$0.00" />
+
+                        <TextView
+                            android:id="@+id/taxTextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="$0.00" />
+
+                        <TextView
+                            android:id="@+id/totalTextView"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="$0.00" />
+
+                        <com.google.android.material.card.MaterialCardView
+                            android:id="@+id/remainingCard"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            app:cardBackgroundColor="@color/remaining_positive">
+
+                            <TextView
+                                android:id="@+id/remainingTextView"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="16dp"
+                                android:text="$0.00"
+                                android:textColor="@color/white"
+                                android:textStyle="bold" />
+                        </com.google.android.material.card.MaterialCardView>
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+    </LinearLayout>
+
+</LinearLayout>
