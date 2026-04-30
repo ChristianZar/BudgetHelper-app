@@ -38,6 +38,7 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
@@ -65,6 +66,8 @@ public class BudgetMainFragment extends Fragment {
 
     private double subtotal = 0.0;
     private double taxRate = 0.0;
+    private boolean sessionDirty = false;
+    private long currentSessionId = -1;
 
     private BudgetDao dao;
 
@@ -120,17 +123,16 @@ public class BudgetMainFragment extends Fragment {
             }
 
             if (item.getItemId() == R.id.action_graph) {
-                saveSessionIfNeeded();
-
-                new android.os.Handler(requireActivity().getMainLooper()).postDelayed(() -> {
-                    startActivity(new Intent(requireContext(), MonthlyGraphActivity.class));
-                }, 500);
-
+                startActivity(new Intent(requireContext(), MonthlyGraphActivity.class));
                 return true;
             }
 
             if (item.getItemId() == R.id.action_new_session) {
                 confirmNewSession();
+                return true;
+            }
+            if (item.getItemId() == R.id.action_description) {
+                startActivity(new Intent(requireContext(), DescriptionActivity.class));
                 return true;
             }
             if (item.getItemId() == R.id.action_about) {
@@ -223,6 +225,7 @@ public class BudgetMainFragment extends Fragment {
 
                         subtotal -= deletedItem.getPrice();
                         adapter.removeItem(position);
+                        sessionDirty = true;
 
                         updateEmptyState();
                         recalculateWithCurrentBudget();
@@ -265,7 +268,8 @@ public class BudgetMainFragment extends Fragment {
     }
 
     private void saveSessionIfNeeded() {
-        if (itemList == null || itemList.isEmpty()) return;
+        if (!sessionDirty || itemList == null || itemList.isEmpty()) return;
+        sessionDirty = false;
 
         String budgetText = budgetEditText.getText() != null
                 ? budgetEditText.getText().toString().trim() : "";
@@ -286,11 +290,22 @@ public class BudgetMainFragment extends Fragment {
                 System.currentTimeMillis(), budget, zip, taxRate, subtotal, taxAmount, total);
 
         final ArrayList<BudgetItem> snapshot = new ArrayList<>(itemList);
+        final long existingId = currentSessionId;
 
         new Thread(() -> {
-            long sessionId = dao.insertSession(session);
-            for (BudgetItem item : snapshot) {
-                dao.insertItem(new SessionItemEntity(sessionId, item.getName(), item.getPrice()));
+            if (existingId == -1) {
+                long newId = dao.insertSession(session);
+                currentSessionId = newId;
+                for (BudgetItem item : snapshot) {
+                    dao.insertItem(new SessionItemEntity(newId, item.getName(), item.getPrice()));
+                }
+            } else {
+                dao.updateSession(existingId, session.savedAt, session.budget, session.zip,
+                        session.taxRate, session.subtotal, session.taxAmount, session.total);
+                dao.deleteItemsForSession(existingId);
+                for (BudgetItem item : snapshot) {
+                    dao.insertItem(new SessionItemEntity(existingId, item.getName(), item.getPrice()));
+                }
             }
         }).start();
     }
@@ -310,6 +325,8 @@ public class BudgetMainFragment extends Fragment {
 
         subtotal = 0.0;
         taxRate = 0.0;
+        sessionDirty = false;
+        currentSessionId = -1;
 
         taxLabelText.setText("Tax");
         budgetEditText.setText("");
@@ -337,6 +354,8 @@ public class BudgetMainFragment extends Fragment {
             gaugeCard.setCardBackgroundColor(
                     ColorStateList.valueOf(ContextCompat.getColor(requireContext(), R.color.surface)));
         }
+
+        Snackbar.make(requireView(), "New session started", Snackbar.LENGTH_SHORT).show();
     }
 
     private void addItem() {
@@ -377,6 +396,7 @@ public class BudgetMainFragment extends Fragment {
 
         itemList.add(new BudgetItem(itemName, itemPrice));
         adapter.notifyItemInserted(itemList.size() - 1);
+        sessionDirty = true;
 
         subtotal += itemPrice;
 

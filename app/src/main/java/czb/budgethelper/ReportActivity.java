@@ -1,6 +1,5 @@
 package czb.budgethelper;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,13 +10,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ShareCompat;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -40,6 +42,7 @@ public class ReportActivity extends AppCompatActivity {
     private BudgetDao dao;
     private List<SessionEntity> currentSessions = new ArrayList<>();
     private SessionAdapter sessionAdapter;
+    private int currentFilter = 0;
 
     private static final int FILTER_TODAY = 0;
     private static final int FILTER_WEEK = 1;
@@ -53,6 +56,13 @@ public class ReportActivity extends AppCompatActivity {
 
         MaterialToolbar toolbar = findViewById(R.id.reportToolbar);
         toolbar.setNavigationOnClickListener(v -> finish());
+        toolbar.setOnMenuItemClickListener(item -> {
+            if (item.getItemId() == R.id.action_clear_all) {
+                confirmClearAll();
+                return true;
+            }
+            return false;
+        });
 
         sessionsRecyclerView = findViewById(R.id.sessionsRecyclerView);
         reportEmptyText = findViewById(R.id.reportEmptyText);
@@ -63,6 +73,27 @@ public class ReportActivity extends AppCompatActivity {
         sessionAdapter = new SessionAdapter();
         sessionsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         sessionsRecyclerView.setAdapter(sessionAdapter);
+
+        // Swipe left to delete individual session
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView rv, @NonNull RecyclerView.ViewHolder vh, @NonNull RecyclerView.ViewHolder t) {
+                return false;
+            }
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int pos = viewHolder.getAdapterPosition();
+                SessionEntity deleted = currentSessions.get(pos);
+                currentSessions.remove(pos);
+                sessionAdapter.notifyItemRemoved(pos);
+                updateEmptyState();
+                new Thread(() -> {
+                    dao.deleteItemsForSession(deleted.id);
+                    dao.deleteSession(deleted.id);
+                }).start();
+                Snackbar.make(sessionsRecyclerView, "Session deleted", Snackbar.LENGTH_SHORT).show();
+            }
+        }).attachToRecyclerView(sessionsRecyclerView);
 
         String[] filters = {
                 getString(R.string.filter_today),
@@ -78,6 +109,7 @@ public class ReportActivity extends AppCompatActivity {
         filterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                currentFilter = position;
                 loadSessions(position);
             }
             @Override
@@ -99,13 +131,37 @@ public class ReportActivity extends AppCompatActivity {
                 sessions = dao.getSessionsFrom(sinceMs);
             }
             runOnUiThread(() -> {
-                currentSessions = sessions;
+                currentSessions = new ArrayList<>(sessions);
                 sessionAdapter.notifyDataSetChanged();
-                boolean empty = sessions.isEmpty();
-                sessionsRecyclerView.setVisibility(empty ? View.GONE : View.VISIBLE);
-                reportEmptyText.setVisibility(empty ? View.VISIBLE : View.GONE);
+                updateEmptyState();
             });
         }).start();
+    }
+
+    private void updateEmptyState() {
+        boolean empty = currentSessions.isEmpty();
+        sessionsRecyclerView.setVisibility(empty ? View.GONE : View.VISIBLE);
+        reportEmptyText.setVisibility(empty ? View.VISIBLE : View.GONE);
+    }
+
+    private void confirmClearAll() {
+        new AlertDialog.Builder(this)
+                .setTitle("Clear All Sessions?")
+                .setMessage("This will permanently delete all saved sessions and cannot be undone.")
+                .setPositiveButton("Clear All", (dialog, which) -> {
+                    new Thread(() -> {
+                        dao.deleteAllSessionItems();
+                        dao.deleteAllSessions();
+                        runOnUiThread(() -> {
+                            currentSessions.clear();
+                            sessionAdapter.notifyDataSetChanged();
+                            updateEmptyState();
+                            Snackbar.make(sessionsRecyclerView, "All sessions cleared", Snackbar.LENGTH_SHORT).show();
+                        });
+                    }).start();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     private long getSinceMs(int filter) {
@@ -140,7 +196,6 @@ public class ReportActivity extends AppCompatActivity {
             for (SessionEntity s : currentSessions) {
                 List<SessionItemEntity> items = dao.getItemsForSession(s.id);
 
-                // Build items inline string
                 StringBuilder itemsStr = new StringBuilder();
                 for (SessionItemEntity item : items) {
                     if (itemsStr.length() > 0) itemsStr.append(" | ");
@@ -195,14 +250,12 @@ public class ReportActivity extends AppCompatActivity {
             holder.remainingText.setTextColor(getColor(
                     remaining < 0 ? R.color.remaining_negative : R.color.remaining_positive));
 
-            // Load item count in background
             new Thread(() -> {
                 List<SessionItemEntity> items = dao.getItemsForSession(s.id);
                 runOnUiThread(() -> {
                     int count = items.size();
                     holder.itemCountText.setText(count + (count == 1 ? " item" : " items"));
 
-                    // Build items text for expanded view
                     StringBuilder sb = new StringBuilder();
                     for (SessionItemEntity item : items) {
                         sb.append("• ").append(item.name)
@@ -214,7 +267,6 @@ public class ReportActivity extends AppCompatActivity {
                 });
             }).start();
 
-            // Toggle expand on tap
             holder.itemView.setOnClickListener(v -> {
                 boolean expanded = holder.itemsContainer.getVisibility() == View.VISIBLE;
                 holder.itemsContainer.setVisibility(expanded ? View.GONE : View.VISIBLE);

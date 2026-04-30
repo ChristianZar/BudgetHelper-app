@@ -51,7 +51,7 @@
     <string name="error_item_price">Please enter the item price</string>
     <string name="error_numbers">Please enter valid numbers</string>
 
-    <!-- Spending Meter gauge (Thinh Le's animation) -->
+    <!-- Spending Meter gauge (Duc Le's animation) -->
     <string name="gauge_title">Spending Meter</string>
     <string name="gauge_face_desc">Budget gauge face</string>
     <string name="gauge_needle_desc">Budget gauge needle</string>
@@ -63,7 +63,7 @@
     <string name="about_title">About</string>
 
     <string name="about_message">
-    Budget Helper\n\nCreated by Christian Zarate\nMobile App Development Course
+    Budget Helper\n\nCreated by Christian Zarate and Duc Le\nMobile App Development Course
 </string>
 
     <string name="toolbar_subtitle">Track your spending in real time</string>
@@ -78,12 +78,17 @@
     <string name="label_remaining">Remaining</string>
     <string name="item_name_label">Item Name</string>
 
-    <string name="monthly_graph_title">Last 6 Months Spending</string>
+    <string name="monthly_graph_title">Last Months Spending</string>
     <string name="highest_month">Highest:</string>
     <string name="lowest_month">Lowest:</string>
     <string name="average_spending">Average:</string>
     <string name="menu_graph">Monthly Graph</string>
+    <string name="menu_description">Description</string>
     <string name="menu_about">About</string>
+
+    <string name="description_title">App Description</string>
+    <string name="description_app_name">Budget Helper</string>
+    <string name="description_body">Budget Helper is a real-time personal finance tracker designed to help you stay on budget while shopping or spending.\n\nKey Features:\n• Set a total budget and track spending as you go\n• Add items manually or scan barcodes to auto-fill product names\n• Auto-calculate sales tax based on your ZIP code or GPS location\n• Visual spending meter with animated gauge and piggy bank\n• View past sessions and monthly spending graphs\n• Export spending history as a CSV file\n\nThe app uses your device\'s GPS for location-based tax lookup and camera for barcode scanning.</string>
 
 
     <string name="use_my_location">Use My Location</string>
@@ -93,6 +98,6 @@
     <string name="location_zip_set">ZIP code set from current location</string>
 
     <string name="about_app_name">Budget Helper</string>
-    <string name="about_author">Created by Christian Zarate</string>
+    <string name="about_author">Christian Zarate &amp; Duc Le</string>
     <string name="about_semester">Spring 2026 Semester</string>
 </resources>

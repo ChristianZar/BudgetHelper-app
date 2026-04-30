@@ -12,8 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/colorPrimary"
-        android:title="@string/about_title"
-        android:titleTextColor="@color/white"
+        app:title="@string/about_title"
+        app:titleTextColor="@color/white"
         app:navigationIcon="@drawable/ic_arrow_back"
         app:navigationIconTint="@color/white" />
 
@@ -36,10 +36,19 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/about_author"
-            android:textSize="18sp"
+            android:text="Created by"
+            android:textSize="14sp"
             android:layout_marginTop="16dp"
             android:textColor="@color/text_secondary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/about_author"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/text_primary" />
 
         <TextView
             android:layout_width="wrap_content"

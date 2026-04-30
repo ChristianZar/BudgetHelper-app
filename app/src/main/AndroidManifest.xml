@@ -19,8 +19,12 @@
             android:name=".AboutActivity"
             android:exported="false" />
         <activity
-            android:name=".MonthlyGraphActivity"
+            android:name=".DescriptionActivity"
             android:exported="false" />
+        <activity
+            android:name=".MonthlyGraphActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".MainActivity"
             android:exported="true">

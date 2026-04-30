@@ -15,7 +15,8 @@
         app:title="@string/report_title"
         app:titleTextColor="@color/white"
         app:navigationIcon="@drawable/ic_arrow_back"
-        app:navigationIconTint="@color/white" />
+        app:navigationIconTint="@color/white"
+        app:menu="@menu/menu_report" />
 
     <!-- Filter spinner -->
     <com.google.android.material.card.MaterialCardView
