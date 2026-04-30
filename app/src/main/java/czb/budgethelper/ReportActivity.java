@@ -1,5 +1,7 @@
 package czb.budgethelper;
 
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +14,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ShareCompat;
+import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,6 +23,9 @@ import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -185,7 +190,10 @@ public class ReportActivity extends AppCompatActivity {
     }
 
     private void exportCsv() {
-        if (currentSessions.isEmpty()) return;
+        if (currentSessions.isEmpty()) {
+            Snackbar.make(sessionsRecyclerView, "No sessions to export", Snackbar.LENGTH_SHORT).show();
+            return;
+        }
 
         new Thread(() -> {
             StringBuilder csv = new StringBuilder();
@@ -199,7 +207,7 @@ public class ReportActivity extends AppCompatActivity {
                 StringBuilder itemsStr = new StringBuilder();
                 for (SessionItemEntity item : items) {
                     if (itemsStr.length() > 0) itemsStr.append(" | ");
-                    itemsStr.append(item.name).append(":$")
+                    itemsStr.append(csvEscape(item.name)).append(":$")
                             .append(String.format(Locale.US, "%.2f", item.price));
                 }
 
@@ -208,20 +216,38 @@ public class ReportActivity extends AppCompatActivity {
                         "\"%s\",%.2f,%.2f,%.2f,%.2f,%.2f,\"%s\",\"%s\"\n",
                         sdf.format(new Date(s.savedAt)),
                         s.budget, s.subtotal, s.taxAmount, s.total, remaining,
-                        s.zip != null ? s.zip : "",
-                        itemsStr));
+                        csvEscape(s.zip != null ? s.zip : ""),
+                        csvEscape(itemsStr.toString())));
             }
 
-            String csvText = csv.toString();
-            runOnUiThread(() -> {
-                new ShareCompat.IntentBuilder(this)
-                        .setType("text/plain")
-                        .setSubject("Budget Helper Report")
-                        .setText(csvText)
-                        .setChooserTitle(getString(R.string.export_chooser_title))
-                        .startChooser();
-            });
+            try {
+                File csvFile = new File(getCacheDir(), "budget_report.csv");
+                FileWriter writer = new FileWriter(csvFile);
+                writer.write(csv.toString());
+                writer.flush();
+                writer.close();
+
+                Uri fileUri = FileProvider.getUriForFile(
+                        this, "czb.budgethelper.fileprovider", csvFile);
+
+                runOnUiThread(() -> {
+                    Intent intent = new Intent(Intent.ACTION_SEND);
+                    intent.setType("text/csv");
+                    intent.putExtra(Intent.EXTRA_STREAM, fileUri);
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "Budget Helper Report");
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    startActivity(Intent.createChooser(intent,
+                            getString(R.string.export_chooser_title)));
+                });
+            } catch (IOException e) {
+                runOnUiThread(() ->
+                        Snackbar.make(sessionsRecyclerView, "Export failed", Snackbar.LENGTH_SHORT).show());
+            }
         }).start();
+    }
+
+    private String csvEscape(String value) {
+        return value.replace("\"", "\"\"");
     }
 
     // ── RecyclerView adapter ──────────────────────────────────────────────────
