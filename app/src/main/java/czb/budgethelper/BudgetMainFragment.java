@@ -51,6 +51,7 @@ import czb.budgethelper.db.AppDatabase;
 import czb.budgethelper.db.BudgetDao;
 import czb.budgethelper.db.SessionEntity;
 import czb.budgethelper.db.SessionItemEntity;
+import android.content.Intent;
 
 public class BudgetMainFragment extends Fragment {
 
@@ -132,9 +133,8 @@ public class BudgetMainFragment extends Fragment {
                 confirmNewSession();
                 return true;
             }
-
             if (item.getItemId() == R.id.action_about) {
-                showAboutDialog();
+                startActivity(new Intent(requireContext(), AboutActivity.class));
                 return true;
             }
 

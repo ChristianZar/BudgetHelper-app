@@ -86,10 +86,13 @@
     <string name="menu_about">About</string>
 
 
-
     <string name="use_my_location">Use My Location</string>
     <string name="location_permission_denied">Location permission denied</string>
     <string name="location_not_found">Could not get current location</string>
     <string name="zip_not_found">Could not find ZIP code from location</string>
     <string name="location_zip_set">ZIP code set from current location</string>
+
+    <string name="about_app_name">Budget Helper</string>
+    <string name="about_author">Created by Christian Zarate</string>
+    <string name="about_semester">Spring 2026 Semester</string>
 </resources>
